@@ -259,7 +259,14 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "Betting is not available right now" });
       }
 
-      const user = await User.findOne({ username: userId });
+      // Try to find user by both _id and username
+      const user = await User.findOne({ 
+        $or: [
+          { _id: userId },
+          { username: userId }
+        ]
+      });
+      
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
