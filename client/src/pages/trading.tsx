@@ -47,21 +47,41 @@ export default function TradingPage({ user: initialUser, onLogout }: TradingPage
 
   const { data: game, refetch: refetchGame } = useQuery({
     queryKey: ["/api/game/current"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/game/current");
+      if (!response.ok) throw new Error("Failed to fetch game");
+      return response.json();
+    },
     refetchInterval: 1000, // Refresh every second
   });
 
   const { data: bets = [] } = useQuery({
     queryKey: ["/api/bets/current"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/bets/current");
+      if (!response.ok) throw new Error("Failed to fetch bets");
+      return response.json();
+    },
     refetchInterval: 2000, // Refresh every 2 seconds
   });
 
   const { data: betHistory = [] } = useQuery({
     queryKey: ["/api/bets/history"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/bets/history");
+      if (!response.ok) throw new Error("Failed to fetch bet history");
+      return response.json();
+    },
     refetchInterval: 5000,
   });
 
   const { data: priceHistory = [] } = useQuery({
     queryKey: ["/api/price/history"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/price/history");
+      if (!response.ok) throw new Error("Failed to fetch price history");
+      return response.json();
+    },
     refetchInterval: 2000,
   });
 
@@ -215,15 +235,25 @@ export default function TradingPage({ user: initialUser, onLogout }: TradingPage
                   ${user?.balance || "0.00"}
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onLogout}
-                className="text-xs bg-gray-800 border-gray-600 text-white hover:bg-gray-700"
-                data-testid="button-logout"
-              >
-                Logout
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open('/admin', '_blank')}
+                  className="text-xs bg-blue-600 border-blue-500 text-white hover:bg-blue-700"
+                >
+                  Admin
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onLogout}
+                  className="text-xs bg-gray-800 border-gray-600 text-white hover:bg-gray-700"
+                  data-testid="button-logout"
+                >
+                  Logout
+                </Button>
+              </div>
             </div>
           </div>
 
