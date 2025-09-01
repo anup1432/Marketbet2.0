@@ -289,6 +289,92 @@ export function registerRoutes(app: Express): Server {
     res.json(gameHistory || []);
   });
 
+  // User transactions endpoint
+  app.get("/api/user/transactions", async (req, res) => {
+    try {
+      const { username } = req.query;
+      
+      if (!username) {
+        return res.status(400).json({ message: "Username required" });
+      }
+
+      const transactions = await Transaction.find({ userId: username })
+        .sort({ createdAt: -1 })
+        .limit(10);
+      
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching user transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Top players endpoint
+  app.get("/api/game/top-players", async (req, res) => {
+    try {
+      // Get all users and calculate their stats
+      const users = await User.find({}).select('username balance');
+      
+      // Calculate stats from bet history
+      const playerStats = {};
+      
+      // Add real users
+      users.forEach(user => {
+        playerStats[user.username] = {
+          username: user.username,
+          totalBets: 0,
+          totalWins: 0,
+          totalProfit: 0,
+          isBot: false
+        };
+      });
+      
+      // Add some active bots from current game
+      if (currentGame && currentGame.bets) {
+        const botBets = currentGame.bets.filter(bet => bet.isBot);
+        botBets.forEach(bet => {
+          if (!playerStats[bet.userId]) {
+            playerStats[bet.userId] = {
+              username: bet.userId,
+              totalBets: 0,
+              totalWins: 0,
+              totalProfit: Math.random() * 500 - 100, // Random profit for bots
+              isBot: true
+            };
+          }
+        });
+      }
+      
+      // Calculate stats from game history
+      gameHistory.forEach(game => {
+        if (playerStats[game.userId]) {
+          playerStats[game.userId].totalBets++;
+          if (game.isWin) {
+            playerStats[game.userId].totalWins++;
+            playerStats[game.userId].totalProfit += (game.winAmount - game.amount);
+          } else {
+            playerStats[game.userId].totalProfit -= game.amount;
+          }
+        }
+      });
+      
+      // Convert to array and calculate win rates
+      const topPlayers = Object.values(playerStats)
+        .map((player: any) => ({
+          ...player,
+          winRate: player.totalBets > 0 ? Math.round((player.totalWins / player.totalBets) * 100) : 0
+        }))
+        .filter(player => player.totalBets > 0 || player.isBot) // Show players with bets or bots
+        .sort((a, b) => b.totalProfit - a.totalProfit) // Sort by profit
+        .slice(0, 10); // Top 10
+      
+      res.json(topPlayers);
+    } catch (error) {
+      console.error("Error fetching top players:", error);
+      res.status(500).json({ message: "Failed to fetch top players" });
+    }
+  });
+
   // Place bet endpoint
   app.post("/api/bets", async (req, res) => {
     try {
