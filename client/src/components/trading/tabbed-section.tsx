@@ -15,7 +15,7 @@ export default function TabbedSection({ betHistory }: TabbedSectionProps) {
   const tabs = [
     { id: "history", label: "Recent History" },
     { id: "transactions", label: "Transactions" },
-    { id: "topplayers", label: "Top Players" }
+    { id: "topplayers", label: "Legend" }
   ];
 
   const mockTransactions = [
