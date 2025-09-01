@@ -280,8 +280,7 @@ export default function TradingPage({ user: initialUser, onLogout }: TradingPage
                   <span className="text-orange-400 text-xl font-bold">₿</span>
                 </div>
                 <div>
-                  <span className="font-bold text-lg">BTC/USDT</span>
-                  <div className="text-sm text-muted-foreground">5s intervals</div>
+                  
                 </div>
               </div>
               <div className="text-right">
