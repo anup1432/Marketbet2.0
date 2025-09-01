@@ -88,28 +88,30 @@ export default function BettingControls({ onPlaceBet, disabled, userBalance }: B
         </div>
 
         {/* Betting Buttons */}
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <Button
-            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
+            className="flex-1 bg-gradient-to-br from-green-500 via-green-600 to-green-700 hover:from-green-600 hover:via-green-700 hover:to-green-800 text-white font-bold py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 disabled:opacity-50 border border-green-400/30 rounded-xl"
             onClick={() => handlePlaceBet("up")}
             disabled={disabled || selectedAmount > userBalance}
             data-testid="button-bet-up"
           >
-            <div className="flex flex-col items-center">
-              <span className="text-2xl">↗</span>
-              <span>UP</span>
+            <div className="flex flex-col items-center gap-1">
+              <div className="text-3xl">📈</div>
+              <span className="font-extrabold tracking-wide">UP</span>
+              <span className="text-xs opacity-90">Win 1.95x</span>
             </div>
           </Button>
 
           <Button
-            className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
+            className="flex-1 bg-gradient-to-br from-red-500 via-red-600 to-red-700 hover:from-red-600 hover:via-red-700 hover:to-red-800 text-white font-bold py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 disabled:opacity-50 border border-red-400/30 rounded-xl"
             onClick={() => handlePlaceBet("down")}
             disabled={disabled || selectedAmount > userBalance}
             data-testid="button-bet-down"
           >
-            <div className="flex flex-col items-center">
-              <span className="text-2xl">↙</span>
-              <span>DOWN</span>
+            <div className="flex flex-col items-center gap-1">
+              <div className="text-3xl">📉</div>
+              <span className="font-extrabold tracking-wide">DOWN</span>
+              <span className="text-xs opacity-90">Win 1.95x</span>
             </div>
           </Button>
         </div>
