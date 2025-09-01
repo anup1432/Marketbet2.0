@@ -102,6 +102,11 @@ const createNewGame = async () => {
   }, 20000);
 };
 
+const generateRandomPrice = () => {
+  const change = (Math.random() - 0.5) * 1000; // -500 to +500 change
+  return Math.max(60000, currentPrice + change);
+};
+
 const generateBotBets = () => {
   if (!currentGame) return;
 
