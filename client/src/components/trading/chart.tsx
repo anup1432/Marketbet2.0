@@ -81,11 +81,13 @@ export default function Chart({ priceHistory }: ChartProps) {
                 type="monotone"
                 dataKey="price"
                 stroke={priceChange >= 0 ? "#10B981" : "#EF4444"}
-                strokeWidth={3}
+                strokeWidth={2}
                 dot={false}
                 isAnimationActive={true}
-                animationDuration={800}
+                animationDuration={1500}
+                animationEasing="ease-in-out"
                 connectNulls={true}
+                strokeDasharray="0"
               />
             </LineChart>
           </ResponsiveContainer>
