@@ -16,7 +16,7 @@ export default function Timer({ game }: TimerProps) {
       const elapsed = now - game.startTime;
       const remaining = Math.max(0, Math.ceil((game.duration - elapsed) / 1000));
       setTimeLeft(remaining);
-    }, 100);
+    }, 1000); // Changed from 100ms to 1000ms for smoother display
 
     return () => clearInterval(interval);
   }, [game]);
