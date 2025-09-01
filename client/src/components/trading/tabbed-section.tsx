@@ -1,35 +1,47 @@
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface TabbedSectionProps {
   betHistory: any[];
+  currentUser: any;
 }
-interface TabbedSectionProps {
-  betHistory: any[];
-}
-export default function TabbedSection({ betHistory }: TabbedSectionProps) {
+
+export default function TabbedSection({ betHistory, currentUser }: TabbedSectionProps) {
   const [activeTab, setActiveTab] = useState("history");
 
   const tabs = [
     { id: "history", label: "Recent History" },
     { id: "transactions", label: "Transactions" },
-    { id: "topplayers", label: "Legend" }
+    { id: "topplayers", label: "Top Players" }
   ];
 
-  const mockTransactions = [
-    { id: 1, type: "deposit", amount: 100, status: "completed", time: "2 hours ago" },
-    { id: 2, type: "withdraw", amount: 50, status: "pending", time: "1 day ago" },
-    { id: 3, type: "deposit", amount: 200, status: "completed", time: "3 days ago" }
-  ];
+  // Get real transactions data
+  const { data: transactions = [] } = useQuery({
+    queryKey: ["/api/user/transactions", currentUser?.username],
+    queryFn: async () => {
+      if (!currentUser?.username) return [];
+      const response = await apiRequest("GET", `/api/user/transactions?username=${currentUser.username}`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    refetchInterval: 5000,
+    enabled: !!currentUser?.username
+  });
 
-  const mockTopPlayers = [
-    { rank: 1, username: "CryptoKing", profit: "+$1,245", winRate: "68%" },
-    { rank: 2, username: "TradeMaster", profit: "+$987", winRate: "64%" },
-    { rank: 3, username: "BullRun", profit: "+$756", winRate: "61%" },
-    { rank: 4, username: "You", profit: "+$234", winRate: "45%" }
-  ];
+  // Get top players data
+  const { data: topPlayers = [] } = useQuery({
+    queryKey: ["/api/game/top-players"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/game/top-players");
+      if (!response.ok) return [];
+      return response.json();
+    },
+    refetchInterval: 10000,
+  });
 
   return (
     <Card>
@@ -88,58 +100,75 @@ export default function TabbedSection({ betHistory }: TabbedSectionProps) {
 
           {activeTab === "transactions" && (
             <div className="space-y-2">
-              {mockTransactions.map((tx) => (
-                <div key={tx.id} className="flex justify-between items-center py-3 px-3 bg-gray-800/50 rounded-lg border border-gray-700">
-                  <div className="text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${
-                        tx.type === "deposit" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-                      }`}>
-                        {tx.type.toUpperCase()}
-                      </span>
-                      <span className="text-gray-400">{tx.time}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">${tx.amount}</div>
-                    <div className={`text-xs ${
-                      tx.status === "completed" ? "text-green-400" : "text-yellow-400"
-                    }`}>
-                      {tx.status}
-                    </div>
-                  </div>
+              {transactions.length === 0 ? (
+                <div className="text-center text-gray-400 py-8">
+                  No transactions yet
                 </div>
-              ))}
+              ) : (
+                transactions.map((tx: any) => (
+                  <div key={tx._id} className="flex justify-between items-center py-3 px-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                    <div className="text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${
+                          tx.type === "deposit" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                        }`}>
+                          {tx.type.toUpperCase()}
+                        </span>
+                        <span className="text-gray-400">
+                          {new Date(tx.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium">${tx.amount}</div>
+                      <div className={`text-xs ${
+                        tx.status === "approved" ? "text-green-400" : 
+                        tx.status === "rejected" ? "text-red-400" : "text-yellow-400"
+                      }`}>
+                        {tx.status}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
 
           {activeTab === "topplayers" && (
-            <div className="space-y-2">
-              {mockTopPlayers.map((player) => (
-                <div key={player.rank} className="flex justify-between items-center py-3 px-3 bg-gray-800/50 rounded-lg border border-gray-700">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                      player.rank === 1 ? "bg-yellow-500/20 text-yellow-400" :
-                      player.rank === 2 ? "bg-gray-500/20 text-gray-400" :
-                      player.rank === 3 ? "bg-orange-500/20 text-orange-400" :
-                      "bg-blue-500/20 text-blue-400"
-                    }`}>
-                      #{player.rank}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-white">{player.username}</div>
-                      <div className="text-xs text-gray-400">Win Rate: {player.winRate}</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className={`text-sm font-bold ${
-                      player.profit.startsWith("+") ? "text-green-400" : "text-red-400"
-                    }`}>
-                      {player.profit}
-                    </div>
-                  </div>
+            <div className="space-y-2 max-w-full overflow-hidden">
+              {topPlayers.length === 0 ? (
+                <div className="text-center text-gray-400 py-8">
+                  No players data
                 </div>
-              ))}
+              ) : (
+                topPlayers.map((player: any, index: number) => (
+                  <div key={player.username} className="flex justify-between items-center py-2 px-2 bg-gray-800/50 rounded-lg border border-gray-700">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                        index === 0 ? "bg-yellow-500/20 text-yellow-400" :
+                        index === 1 ? "bg-gray-500/20 text-gray-400" :
+                        index === 2 ? "bg-orange-500/20 text-orange-400" :
+                        "bg-blue-500/20 text-blue-400"
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium text-white truncate">
+                          {player.username === currentUser?.username ? "You" : player.username}
+                        </div>
+                        <div className="text-xs text-gray-400">{player.winRate}%</div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className={`text-sm font-bold ${
+                        player.totalProfit >= 0 ? "text-green-400" : "text-red-400"
+                      }`}>
+                        {player.totalProfit >= 0 ? "+" : ""}${player.totalProfit.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>
