@@ -30,34 +30,32 @@ let currentPrice = 67890.45;
 let priceHistory: Array<{ timestamp: string; price: string; id: string }> = [];
 
 // Initialize price history
-const initializePriceHistory = () => {
-  const now = Date.now();
-  for (let i = 20; i >= 0; i--) {
-    priceHistory.push({
-      id: `price-${Date.now()}-${i}`,
-      timestamp: new Date(Date.now() - (20 - i) * 60000).toISOString(),
-      price: (currentPrice + (Math.random() - 0.5) * 1000).toFixed(2)
-    });
-  }
-};
-
-const generateRandomPrice = () => {
-  const change = (Math.random() - 0.5) * 500; // Random change of ±250
-  const newPrice = Math.max(60000, currentPrice + change);
-  currentPrice = newPrice;
-
+for (let i = 0; i < 20; i++) {
   priceHistory.push({
-    id: `price-${Date.now()}`,
-    timestamp: new Date().toISOString(),
-    price: newPrice.toFixed(2)
+    id: `price-${Date.now()}-${i}`,
+    price: (67890.45 + (Math.random() - 0.5) * 1000).toFixed(2),
+    timestamp: new Date(Date.now() - (20 - i) * 5000).toISOString()
   });
+}
 
-  // Keep only last 50 entries
-  if (priceHistory.length > 50) {
-    priceHistory.shift();
-  }
+// Start price updates
+const startPriceUpdates = () => {
+  if (priceUpdateTimer) clearInterval(priceUpdateTimer);
+  priceUpdateTimer = setInterval(() => {
+    const change = (Math.random() - 0.5) * 500; // -250 to +250
+    currentPrice = Math.max(60000, currentPrice + change);
 
-  return newPrice;
+    priceHistory.push({
+      id: `price-${Date.now()}`,
+      price: currentPrice.toFixed(2),
+      timestamp: new Date().toISOString()
+    });
+
+    // Keep only last 50 entries
+    if (priceHistory.length > 50) {
+      priceHistory.shift();
+    }
+  }, 5000); // Update every 5 seconds
 };
 
 const createNewGame = async () => {
@@ -159,19 +157,13 @@ const processBets = async () => {
   }
 };
 
-function startPriceUpdates() {
-  // Clear any existing timer and start a new one
-  if (priceUpdateTimer) clearInterval(priceUpdateTimer);
-  priceUpdateTimer = setInterval(() => {
-    generateRandomPrice();
-  }, 5000);
-}
+
 
 export function registerRoutes(app: Express): Server {
   const server = createServer(app);
 
   // Initialize price history and game
-  initializePriceHistory();
+  // initializePriceHistory(); // This is now handled by the for loop above.
 
   // Start price updates every 5 seconds
   startPriceUpdates();
@@ -192,7 +184,7 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/user/current", async (req, res) => {
     try {
       const { username } = req.query;
-      
+
       if (!username) {
         return res.status(400).json({ message: "Username required" });
       }
@@ -248,6 +240,8 @@ export function registerRoutes(app: Express): Server {
 
   // Bet history endpoint
   app.get("/api/bets/history", (req, res) => {
+    // This endpoint should ideally return historical bets, but for now, it's empty.
+    // You might want to store bets in a database for a proper history.
     res.json([]);
   });
 
