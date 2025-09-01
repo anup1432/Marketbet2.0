@@ -1,40 +1,46 @@
+
+import { useEffect, useState } from "react";
+
 interface TimerProps {
   game: any;
 }
 
 export default function Timer({ game }: TimerProps) {
-  const timeRemaining = game?.timeRemaining || 20;
+  const [timeLeft, setTimeLeft] = useState(20);
+
+  useEffect(() => {
+    if (!game) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - game.startTime;
+      const remaining = Math.max(0, Math.ceil((game.duration - elapsed) / 1000));
+      setTimeLeft(remaining);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [game]);
+
   const phase = game?.phase || "betting";
-  const circumference = 2 * Math.PI * 28; // radius = 28
-  const strokeDashoffset = circumference - (timeRemaining / (phase === "betting" ? 20 : 5)) * circumference;
+  const isCalculating = phase === "calculating";
 
   return (
-    <div className="relative">
-      <svg className="w-16 h-16 transform -rotate-90">
-        <circle 
-          cx="32" 
-          cy="32" 
-          r="28" 
-          fill="none" 
-          stroke="hsl(var(--muted))" 
-          strokeWidth="4"
+    <div className="text-center">
+      <div className="text-3xl font-bold text-white mb-1">
+        {isCalculating ? "5" : timeLeft}
+      </div>
+      <div className="text-xs text-gray-400">
+        {isCalculating ? "CALCULATING" : "SECONDS LEFT"}
+      </div>
+      <div className="w-16 h-1 bg-gray-700 rounded-full mx-auto mt-2">
+        <div 
+          className={`h-full rounded-full transition-all duration-1000 ${
+            isCalculating ? "bg-yellow-500" : "bg-blue-500"
+          }`}
+          style={{
+            width: isCalculating ? "100%" : `${(timeLeft / 20) * 100}%`
+          }}
         />
-        <circle 
-          cx="32" 
-          cy="32" 
-          r="28" 
-          fill="none" 
-          stroke="hsl(var(--primary))" 
-          strokeWidth="4"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          className="timer-circle"
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-lg font-bold" data-testid="timer-countdown">
-          {timeRemaining}
-        </span>
       </div>
     </div>
   );
