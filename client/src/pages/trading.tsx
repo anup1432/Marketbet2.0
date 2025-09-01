@@ -239,14 +239,6 @@ export default function TradingPage({ user: initialUser, onLogout }: TradingPage
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open('/admin', '_blank')}
-                  className="text-xs bg-blue-600 border-blue-500 text-white hover:bg-blue-700"
-                >
-                  Admin
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
                   onClick={onLogout}
                   className="text-xs bg-gray-800 border-gray-600 text-white hover:bg-gray-700"
                   data-testid="button-logout"
