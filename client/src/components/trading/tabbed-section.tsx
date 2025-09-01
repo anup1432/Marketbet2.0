@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 interface TabbedSectionProps {
   betHistory: any[];
 }
-
+interface TabbedSectionProps {
+  betHistory: any[];
+}
 export default function TabbedSection({ betHistory }: TabbedSectionProps) {
   const [activeTab, setActiveTab] = useState("history");
 
