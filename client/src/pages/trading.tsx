@@ -7,6 +7,7 @@ import Timer from "@/components/trading/timer";
 import Chart from "@/components/trading/chart";
 import PlayerSection from "@/components/trading/player-section";
 import BettingControls from "@/components/trading/betting-controls";
+import TabbedSection from "@/components/trading/tabbed-section";
 import Modal from "@/components/ui/modal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -232,7 +233,7 @@ export default function TradingPage({ user: initialUser, onLogout }: TradingPage
               <div className="bg-gray-900/80 px-4 py-2 rounded-lg border border-gray-700 mb-2">
                 <div className="text-sm text-gray-400">Balance</div>
                 <div className="text-xl font-bold text-blue-400" data-testid="user-balance">
-                  ${user?.balance || "0.00"}
+                  ${typeof user?.balance === 'number' ? user.balance.toFixed(2) : "0.00"}
                 </div>
               </div>
               <div className="flex gap-2">
@@ -323,22 +324,6 @@ export default function TradingPage({ user: initialUser, onLogout }: TradingPage
         {/* Chart */}
         <Chart priceHistory={priceHistory} />
 
-        {/* Statistics */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex justify-between text-sm">
-              <div>
-                <span className="text-muted-foreground">24h players:</span>
-                <span className="font-medium ml-1" data-testid="daily-players">412</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">All time wins paid:</span>
-                <span className="font-medium ml-1 text-green-500">$21,839,206.45</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Active Players */}
         <PlayerSection upBets={upBets} downBets={downBets} />
 
@@ -349,37 +334,8 @@ export default function TradingPage({ user: initialUser, onLogout }: TradingPage
           userBalance={parseFloat(user?.balance || "0")}
         />
 
-        {/* History */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-semibold mb-3">Recent History</h3>
-            <div className="space-y-2" data-testid="history-list">
-              {betHistory.slice(0, 10).map((bet: any) => (
-                <div key={bet.id} className="flex justify-between items-center py-2 border-b border-border">
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">
-                      {new Date(bet.createdAt).toLocaleTimeString()}
-                    </span>
-                    <span className={`ml-2 ${bet.side === "up" ? "text-green-500" : "text-red-500"}`}>
-                      {bet.side.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">${bet.amount}</div>
-                    <div className={`text-xs ${bet.isWin ? "text-green-500" : "text-red-500"}`}>
-                      {bet.isWin ? `+$${bet.winAmount}` : `-$${bet.amount}`}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {betHistory.length === 0 && (
-                <div className="text-center text-muted-foreground py-4">
-                  No history yet
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tabbed Section */}
+        <TabbedSection betHistory={betHistory} />
       </main>
 
       {/* Deposit Modal */}
