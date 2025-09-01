@@ -280,7 +280,7 @@ export default function TradingPage({ user: initialUser, onLogout }: TradingPage
                   <span className="text-orange-400 text-xl font-bold">₿</span>
                 </div>
                 <div>
-                  
+                  <div className="text-sm text-muted-foreground">5s intervals</div>
                 </div>
               </div>
               <div className="text-right">
@@ -334,7 +334,7 @@ export default function TradingPage({ user: initialUser, onLogout }: TradingPage
         />
 
         {/* Tabbed Section */}
-        <TabbedSection betHistory={betHistory} />
+        <TabbedSection betHistory={betHistory} currentUser={user} />
       </main>
 
       {/* Deposit Modal */}
