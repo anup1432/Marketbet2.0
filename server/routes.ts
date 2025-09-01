@@ -129,28 +129,69 @@ const generateBotBets = () => {
   }
 };
 
+let gameHistory: any[] = [];
+
 const processBets = async () => {
   if (!currentGame || !currentGame.endPrice) return;
 
-  const isUp = currentGame.endPrice > currentGame.startPrice;
-  const winSide = isUp ? "up" : "down";
+  // Real user betting logic - opposite result for single real user
+  const realUserBets = currentGame.bets.filter((bet: any) => !bet.isBot);
+  
+  let winSide = "up"; // Default
+  
+  if (realUserBets.length > 0) {
+    // Calculate total amounts on each side for real users only
+    const upTotal = realUserBets.filter(bet => bet.side === "up").reduce((sum, bet) => sum + bet.amount, 0);
+    const downTotal = realUserBets.filter(bet => bet.side === "down").reduce((sum, bet) => sum + bet.amount, 0);
+    
+    if (upTotal > 0 && downTotal > 0) {
+      // If user bet on both sides, let the smaller side win
+      winSide = upTotal < downTotal ? "up" : "down";
+    } else if (upTotal > 0) {
+      // User only bet UP, so make DOWN win (70% chance to lose)
+      winSide = Math.random() > 0.3 ? "down" : "up";
+    } else if (downTotal > 0) {
+      // User only bet DOWN, so make UP win (70% chance to lose)
+      winSide = Math.random() > 0.3 ? "up" : "down";
+    }
+  }
 
   // Process real user bets only
-  const userBets = currentGame.bets.filter((bet: any) => !bet.isBot);
-
-  for (const bet of userBets) {
+  for (const bet of realUserBets) {
     try {
       const user = await User.findOne({ username: bet.userId });
       if (user) {
         const isWin = bet.side === winSide;
-        const winAmount = isWin ? bet.amount * 1.95 : 0; // 195% return
+        const winAmount = isWin ? bet.amount * 1.95 : 0;
 
         if (isWin) {
           user.balance += winAmount;
           await user.save();
         }
 
-        // Save bet to history
+        // Add to game history
+        const historyEntry = {
+          id: `history-${Date.now()}-${Math.random()}`,
+          gameId: currentGame.id,
+          userId: bet.userId,
+          side: bet.side,
+          amount: bet.amount,
+          isWin,
+          winAmount,
+          startPrice: currentGame.startPrice,
+          endPrice: currentGame.endPrice,
+          createdAt: new Date().toISOString(),
+          timestamp: Date.now()
+        };
+        
+        gameHistory.unshift(historyEntry);
+        
+        // Keep only last 50 entries
+        if (gameHistory.length > 50) {
+          gameHistory = gameHistory.slice(0, 50);
+        }
+
+        // Save bet details
         bet.isWin = isWin;
         bet.winAmount = winAmount;
         bet.gameId = currentGame.id;
@@ -245,9 +286,7 @@ export function registerRoutes(app: Express): Server {
 
   // Bet history endpoint
   app.get("/api/bets/history", (req, res) => {
-    // This endpoint should ideally return historical bets, but for now, it's empty.
-    // You might want to store bets in a database for a proper history.
-    res.json([]);
+    res.json(gameHistory || []);
   });
 
   // Place bet endpoint
