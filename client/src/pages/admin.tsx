@@ -15,18 +15,33 @@ export default function AdminPage() {
 
   const { data: transactions = [] } = useQuery({
     queryKey: ["/api/admin/transactions"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/transactions");
+      if (!response.ok) throw new Error("Failed to fetch transactions");
+      return response.json();
+    },
     enabled: isAuthenticated,
     refetchInterval: 5000,
   });
 
   const { data: users = [] } = useQuery({
     queryKey: ["/api/admin/users"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/users");
+      if (!response.ok) throw new Error("Failed to fetch users");
+      return response.json();
+    },
     enabled: isAuthenticated,
     refetchInterval: 10000,
   });
 
   const { data: recentActivity = [] } = useQuery({
     queryKey: ["/api/admin/recent-activity"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/recent-activity");
+      if (!response.ok) throw new Error("Failed to fetch recent activity");
+      return response.json();
+    },
     enabled: isAuthenticated,
     refetchInterval: 5000,
   });
