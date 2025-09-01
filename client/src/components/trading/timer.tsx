@@ -14,9 +14,21 @@ export default function Timer({ game }: TimerProps) {
     const interval = setInterval(() => {
       const now = Date.now();
       const elapsed = now - game.startTime;
-      const remaining = Math.max(0, Math.ceil((game.duration - elapsed) / 1000));
-      setTimeLeft(remaining);
-    }, 1000); // Changed from 100ms to 1000ms for smoother display
+      
+      if (game.phase === "calculating") {
+        // During calculation phase, show countdown from 5 to 0
+        const calcStart = game.startTime + game.duration;
+        const calcElapsed = now - calcStart;
+        const calcRemaining = Math.max(0, Math.ceil((5000 - calcElapsed) / 1000));
+        setTimeLeft(calcRemaining);
+      } else if (game.phase === "betting") {
+        // During betting phase, show countdown from 20 to 0
+        const remaining = Math.max(0, Math.ceil((game.duration - elapsed) / 1000));
+        setTimeLeft(remaining);
+      } else {
+        setTimeLeft(0);
+      }
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [game]);
@@ -27,7 +39,7 @@ export default function Timer({ game }: TimerProps) {
   return (
     <div className="text-center">
       <div className="text-3xl font-bold text-white mb-1">
-        {isCalculating ? "5" : timeLeft}
+        {timeLeft}
       </div>
       <div className="text-xs text-gray-400">
         {isCalculating ? "CALCULATING" : "SECONDS LEFT"}
@@ -38,7 +50,7 @@ export default function Timer({ game }: TimerProps) {
             isCalculating ? "bg-yellow-500" : "bg-blue-500"
           }`}
           style={{
-            width: isCalculating ? "100%" : `${(timeLeft / 20) * 100}%`
+            width: isCalculating ? `${(timeLeft / 5) * 100}%` : `${(timeLeft / 20) * 100}%`
           }}
         />
       </div>
