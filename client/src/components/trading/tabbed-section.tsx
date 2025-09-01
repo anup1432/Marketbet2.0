@@ -15,8 +15,8 @@ export default function TabbedSection({ betHistory, currentUser }: TabbedSection
 
   const tabs = [
     { id: "history", label: "Recent History" },
-    { id: "transactions", label: "Transactions" },
-    { id: "topplayers", label: "Top Players" }
+    { id: "transactions", label: "Transaction" },
+    { id: "topplayers", label: "Legend" }
   ];
 
   // Get real transactions data
