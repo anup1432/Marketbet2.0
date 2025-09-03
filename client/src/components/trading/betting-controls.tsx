@@ -9,7 +9,7 @@ interface BettingControlsProps {
   userBalance: number;
 }
 
-const BET_AMOUNTS = [1, 5, 10, 20, 50];
+const BET_AMOUNTS = [0.1, 0.5, 1, 2, 5];
 
 export default function BettingControls({ onPlaceBet, disabled, userBalance }: BettingControlsProps) {
   const [selectedAmount, setSelectedAmount] = useState(1);
